@@ -1,0 +1,54 @@
+version: '3.8'
+services:
+  apache:
+    image: php:7.2-apache
+    container_name: php_apache
+    restart: always
+    volumes:
+      - ./html:/var/www/html
+    ports:
+      - '80:80'
+    depends_on:
+      - db
+    links:
+      - db
+    networks:
+      - "rede-apache" 
+  db:
+    image: mysql:latest
+    container_name: mysql_apache
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./dbdata:/var/lib/mysql
+    networks:
+      - "rede-apache"
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    restart: always
+    container_name: php_my_admin_apache
+    environment:
+      MYSQL_ROOT_PASSWORD: "1234"
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 1234
+      
+      # PMA_ARBITRARY: 1  #habilitar o uso do servidir
+    depends_on:
+      - db
+      - apache
+    ports:
+      - "8080:80"
+    networks:
+      - "rede-apache"
+
+volumes:
+  dbdata:
+  html:
+
+networks:
+  rede-apache:
+    driver: bridge
